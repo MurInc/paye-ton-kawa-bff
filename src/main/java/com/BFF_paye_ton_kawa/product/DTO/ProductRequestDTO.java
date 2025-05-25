@@ -9,14 +9,13 @@ public class ProductRequestDTO {
     @NotBlank(message = "Product description is required")
     private String description;
 
-    @NotBlank(message = "Product origin is required")
+    @NotBlank(message = " origin is requiredProduct")
     private String origin;
 
     @NotNull(message = "Product price is required")
     @PositiveOrZero(message = "Price must be positive or zero")
     private Double price;
 
-    @NotNull(message = "Stock is required")
     @PositiveOrZero(message = "Stock must be positive or zero")
     private Integer stock;
 

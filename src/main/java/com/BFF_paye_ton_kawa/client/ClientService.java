@@ -1,5 +1,6 @@
 package com.BFF_paye_ton_kawa.client;
 
+import com.BFF_paye_ton_kawa.client.DTO.ClientRequestDTO;
 import com.BFF_paye_ton_kawa.client.DTO.ClientResponseDTO;
 import com.BFF_paye_ton_kawa.client.DTO.ClientsResponseDTO;
 import com.BFF_paye_ton_kawa.config.ApiProperties;
@@ -26,5 +27,19 @@ public class ClientService {
     public ClientResponseDTO getClientById(String id) {
         String path = apiProps.getClientUrl() + "/" + id;
         return restTemplate.getForObject(path, ClientResponseDTO.class);
+    }
+
+    public ClientResponseDTO ClientCreation(ClientRequestDTO clientInformation) {
+        String path = apiProps.getClientUrl();
+        return restTemplate.postForObject(path, clientInformation, ClientResponseDTO.class);
+    }
+
+    public void deleteClient(String id) {
+
+        String path = UriComponentsBuilder.fromUriString(apiProps.getClientUrl())
+                .pathSegment(id)
+                .toUriString();
+        System.out.println("Deleting client at path: " + path);
+        restTemplate.delete(path);
     }
 }

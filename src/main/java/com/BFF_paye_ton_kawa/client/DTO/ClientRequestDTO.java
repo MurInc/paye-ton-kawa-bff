@@ -1,15 +1,9 @@
 package com.BFF_paye_ton_kawa.client.DTO;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.*;
 import jdk.jfr.BooleanFlag;
 
 public class ClientRequestDTO {
-
-    @NotBlank()
-    public String _id;
 
     @NotBlank()
     public String first_name;
@@ -23,17 +17,18 @@ public class ClientRequestDTO {
 
     @NotNull()
     @PositiveOrZero()
-    public int birth_date;
+    @Size(min = 2)
+    public int age;
 
-    @BooleanFlag()
-    public Boolean is_validated;
+    @NotBlank()
+    public  String username;
 
-    public String get_id() {
-        return _id;
+    public String getUsername() {
+        return username;
     }
 
-    public void set_id(String _id) {
-        this._id = _id;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getFirst_name() {
@@ -60,19 +55,11 @@ public class ClientRequestDTO {
         this.email = email;
     }
 
-    public int getBirth_date() {
-        return birth_date;
+    public int getAge() {
+        return age;
     }
 
-    public void setBirth_date(int birth_date) {
-        this.birth_date = birth_date;
-    }
-
-    public Boolean getIs_validated() {
-        return is_validated;
-    }
-
-    public void setIs_validated(Boolean is_validated) {
-        this.is_validated = is_validated;
+    public void setAge(int age) {
+        this.age = age;
     }
 }

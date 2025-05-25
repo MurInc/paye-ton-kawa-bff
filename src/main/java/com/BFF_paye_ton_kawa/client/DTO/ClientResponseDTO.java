@@ -1,18 +1,13 @@
 package com.BFF_paye_ton_kawa.client.DTO;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class ClientResponseDTO {
-    public String _id;
+    @JsonProperty("_id")
+    public String id;
 //    public String userName;
     public String email;
 //    public String age;
-
-    public String get_id() {
-        return _id;
-    }
-
-    public void set_id(String _id) {
-        this._id = _id;
-    }
 
 //    public String getUserName() {
 //        return userName;
@@ -21,6 +16,15 @@ public class ClientResponseDTO {
 //    public void setUserName(String userName) {
 //        this.userName = userName;
 //    }
+
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getEmail() {
         return email;
