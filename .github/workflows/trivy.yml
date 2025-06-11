@@ -13,7 +13,7 @@
           uses: aquasecurity/trivy-action@0.28.0
           with:
             image-ref: 'paye-ton-kaya:latest'
-            format: 'template'
+            format: 'sarif'
             template: '@/contrib/sarif.tpl'
             output: 'trivy-results.sarif'
             severity: 'CRITICAL,HIGH'
