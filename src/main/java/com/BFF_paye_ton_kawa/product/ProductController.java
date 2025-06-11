@@ -29,7 +29,8 @@ public class ProductController {
 
     @GetMapping("/{id}")
 
-    public ProductResponseDTO getProductById(@PathVariable @Size(min = 20, message = "ID not valid, it should contain 20 or more characters") String id) {
+    public ProductResponseDTO getProductById(@PathVariable @Size(min = 20, message = "ID not valid, it should contain 20 or more characters") String id) throws Exception {
+
         return productServices.getProductById(id);
     }
 
