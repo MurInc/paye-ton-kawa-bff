@@ -10,7 +10,7 @@
         - name: Set up Docker Buildx
           run: docker build -t docker.io/my-organization/my-app:latest
         - name: Run Trivy Scan
-          uses: aquasecurity/trivy-action@v0.3.0
+          uses: aquasecurity/trivy-action@0.28.0
           with:
             image-ref: 'docker.io/my-organization/my-app:${{ github.sha }}'
             format: 'template'
