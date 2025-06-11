@@ -21,7 +21,7 @@
             format: 'template'
             template: '@/contrib/sarif.tpl'
             output: 'trivy-results.sarif'
-            severity: 'LOW ,HIGH, CRITICALg'
+            severity: 'LOW ,HIGH, CRITICAL'
         - name: Upload Trivy scan results to GitHub Security tab
           uses: github/codeql-action/upload-sarif@v3
           with:
