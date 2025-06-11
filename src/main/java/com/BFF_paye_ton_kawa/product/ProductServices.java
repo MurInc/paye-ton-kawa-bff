@@ -34,6 +34,7 @@ public class ProductServices {
 
     public ProductResponseDTO productCreation(ProductRequestDTO productInformation) {
         String path = apiPros.getProductUrl();
+        String token = "Bearer sdfsjdfkjdhfskdf.dfgdfgdfgdfgdfg.kjjhghjgksdfs6146546";
         return restTemplate.postForObject(path, productInformation, ProductResponseDTO.class);
     }
 
