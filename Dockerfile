@@ -11,7 +11,6 @@ RUN mvn clean package -DskipTests
 
 # Build container
 FROM eclipse-temurin:17-jdk-alpine
-
 WORKDIR /app
 
 COPY --from=build /app/target/*.jar app.jar
