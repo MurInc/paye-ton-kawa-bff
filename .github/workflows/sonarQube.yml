@@ -24,20 +24,12 @@ jobs:
           java-version: 17
           distribution: 'temurin'
 
-      - name: Build project
-        run: mvn clean compile
-
-      - name: Analyze with SonarCloud
-        uses: SonarSource/sonarcloud-github-action@v2.2.0
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          args: |
-            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
-            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION_KEY }}
-            -Dsonar.scm.provider=git
-          projectBaseDir: .
-
+      - name: Build and analyze with SonarCloud
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+          -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }} \
+          -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION_KEY }} \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
       - name: Upload SARIF to GitHub
         uses: github/codeql-action/upload-sarif@v3
         with:
