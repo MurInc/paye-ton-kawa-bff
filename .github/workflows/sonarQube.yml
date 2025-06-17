@@ -32,7 +32,7 @@ jobs:
           -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
           org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
 
-  - name: Upload SARIF to GitHub
+      - name: Upload SARIF to GitHub
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: .scannerwork/report-sarif.json
