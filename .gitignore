@@ -33,3 +33,5 @@ envs
 docker-compose.yml
 ### VS Code ###
 .vscode/
+serviceAccountKey.json
+trivy-results.sarif
