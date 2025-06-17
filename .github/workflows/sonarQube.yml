@@ -33,7 +33,7 @@ jobs:
           args:
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION_KEY }}
-            - Dsonar.scm.provider=git
+            -Dsonar.scm.provider=git
           projectBaseDir: .
       - name: Upload SARIF to GitHub
         uses: github/codeql-action/upload-sarif@v3
