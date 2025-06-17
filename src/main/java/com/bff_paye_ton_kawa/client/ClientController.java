@@ -1,0 +1,43 @@
+package com.bff_paye_ton_kawa.client;
+
+import com.bff_paye_ton_kawa.client.dto.ClientRequestDTO;
+import com.bff_paye_ton_kawa.client.dto.ClientResponseDTO;
+import com.bff_paye_ton_kawa.client.dto.ClientsResponseDTO;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@Tag(name = "Client", description = "Client API")
+@RestController
+@RequestMapping("/clients")
+public class ClientController {
+    final ClientService clientService;
+
+    public ClientController(ClientService clientService) {
+        this.clientService = clientService;
+    }
+
+    @GetMapping("/")
+    public ClientsResponseDTO getClients(@RequestParam Integer page, @RequestParam Integer limit) {
+        return clientService.getAllClients(page, limit);
+    }
+
+    @GetMapping("/{id}")
+    public ClientResponseDTO getClient(@PathVariable String id) {
+        return  clientService.getClientById(id);
+    }
+
+    @PostMapping("/")
+    public ClientResponseDTO createClient(@RequestBody ClientRequestDTO clientInformation) {
+        return clientService.ClientCreation(clientInformation);
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a client by ID", description = "Deletes a client from the system using their unique identifier.")
+    @ResponseStatus(code = org.springframework.http.HttpStatus.NO_CONTENT)
+    public ResponseEntity<Void> deleteClient(@PathVariable String id) {
+        clientService.deleteClient(id);
+        return ResponseEntity.noContent().build();
+    }
+}
