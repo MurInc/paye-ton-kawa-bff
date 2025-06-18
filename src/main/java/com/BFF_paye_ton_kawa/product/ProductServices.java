@@ -1,5 +1,6 @@
 package com.BFF_paye_ton_kawa.product;
 
+import com.BFF_paye_ton_kawa.Utils.JsonMultipleResponse;
 import com.BFF_paye_ton_kawa.config.ApiProperties;
 import com.BFF_paye_ton_kawa.product.DTO.ProductRequestDTO;
 import com.BFF_paye_ton_kawa.product.DTO.ProductResponseDTO;
@@ -8,12 +9,15 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 @Service
 public class ProductServices {
     private final RestTemplate restTemplate;
+    private static final Logger logger = LoggerFactory.getLogger(ProductServices.class);
 
     ApiProperties apiPros;
 
@@ -23,8 +27,8 @@ public class ProductServices {
         this.apiPros = apiProps;
     }
 
-    public List<ProductResponseDTO> getAllProducts() {
-        return restTemplate.exchange(apiPros.getProductUrl(), HttpMethod.GET, null , new ParameterizedTypeReference<List<ProductResponseDTO>>(){}).getBody();
+    public JsonMultipleResponse<ProductResponseDTO> getAllProducts() {
+        return restTemplate.exchange(apiPros.getProductUrl(), HttpMethod.GET, null , new ParameterizedTypeReference<JsonMultipleResponse<ProductResponseDTO>>(){}).getBody();
     }
 
     public ProductResponseDTO getProductById(String id) {

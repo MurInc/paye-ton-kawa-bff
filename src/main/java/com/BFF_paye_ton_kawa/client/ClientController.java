@@ -1,5 +1,6 @@
 package com.BFF_paye_ton_kawa.client;
 
+import com.BFF_paye_ton_kawa.Utils.JsonMultipleResponse;
 import com.BFF_paye_ton_kawa.client.DTO.ClientRequestDTO;
 import com.BFF_paye_ton_kawa.client.DTO.ClientResponseDTO;
 import com.BFF_paye_ton_kawa.client.DTO.ClientsResponseDTO;
@@ -12,7 +13,7 @@ import java.util.List;
 
 @Tag(name = "Client", description = "Client API")
 @RestController
-@RequestMapping("/clients")
+@RequestMapping("/api/clients")
 public class ClientController {
     final ClientService clientService;
 
@@ -21,7 +22,7 @@ public class ClientController {
     }
 
     @GetMapping("/")
-    public ClientsResponseDTO getClients(@RequestParam Integer page, @RequestParam Integer limit) {
+    public JsonMultipleResponse<ClientResponseDTO> getClients(@RequestParam Integer page, @RequestParam Integer limit) {
         return clientService.getAllClients(page, limit);
     }
 

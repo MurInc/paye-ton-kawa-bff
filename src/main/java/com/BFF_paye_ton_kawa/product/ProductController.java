@@ -1,5 +1,6 @@
 package com.BFF_paye_ton_kawa.product;
 
+import com.BFF_paye_ton_kawa.Utils.JsonMultipleResponse;
 import com.BFF_paye_ton_kawa.product.DTO.ProductRequestDTO;
 import com.BFF_paye_ton_kawa.product.DTO.ProductResponseDTO;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,7 +14,7 @@ import java.util.List;
 
 @Tag(name = "Product", description = "Product API")
 @RestController
-@RequestMapping("/products")
+@RequestMapping("/api/products")
 @Validated
 public class ProductController {
     private final ProductServices productServices;
@@ -23,7 +24,7 @@ public class ProductController {
     }
 
     @GetMapping("/")
-    public List<ProductResponseDTO> getProducts() {
+    public JsonMultipleResponse<ProductResponseDTO> getProducts() {
         return productServices.getAllProducts();
     }
 
