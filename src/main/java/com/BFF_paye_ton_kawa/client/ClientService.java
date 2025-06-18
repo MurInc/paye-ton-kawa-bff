@@ -1,9 +1,13 @@
 package com.BFF_paye_ton_kawa.client;
 
+import com.BFF_paye_ton_kawa.Utils.JsonMultipleResponse;
 import com.BFF_paye_ton_kawa.client.DTO.ClientRequestDTO;
 import com.BFF_paye_ton_kawa.client.DTO.ClientResponseDTO;
 import com.BFF_paye_ton_kawa.client.DTO.ClientsResponseDTO;
 import com.BFF_paye_ton_kawa.config.ApiProperties;
+import com.BFF_paye_ton_kawa.product.DTO.ProductResponseDTO;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -18,10 +22,11 @@ public class ClientService {
         this.apiProps = apiProps;
     }
 
-    public ClientsResponseDTO getAllClients(int page, int limit) {
+    public JsonMultipleResponse<ClientResponseDTO> getAllClients(int page, int limit) {
         String basePath = apiProps.getClientUrl();
         String path = UriComponentsBuilder.fromUriString(basePath).queryParam("page", page).queryParam("limit", limit).toUriString();
-        return restTemplate.getForObject(path, ClientsResponseDTO.class);
+        return restTemplate.exchange(path, HttpMethod.GET, null , new ParameterizedTypeReference<JsonMultipleResponse<ClientResponseDTO>>(){}).getBody();
+
     }
 
     public ClientResponseDTO getClientById(String id) {

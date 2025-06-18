@@ -1,6 +1,6 @@
 package com.BFF_paye_ton_kawa.exceptions;
 
-import com.BFF_paye_ton_kawa.exceptions.schema.Error;
+import com.BFF_paye_ton_kawa.exceptions.schema.ApiError;
 import com.BFF_paye_ton_kawa.exceptions.schema.ErrorList;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +13,8 @@ import org.springframework.web.client.HttpClientErrorException;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpClientErrorException.class)
-    public ResponseEntity<Error> handleHttpRequestError(HttpClientErrorException e) {
-        Error error = new Error();
+    public ResponseEntity<ApiError> handleHttpRequestError(HttpClientErrorException e) {
+        ApiError error = new ApiError();
         error.setStatus(e.getStatusCode());
         error.setMessage(e.getResponseBodyAsString());
         return ResponseEntity.status(e.getStatusCode())
@@ -22,8 +22,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Error> handleGeneralException(Exception e) {
-        Error error = new Error();
+    public ResponseEntity<ApiError> handleGeneralException(Exception e) {
+        ApiError error = new ApiError();
 
         error.setStatus(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
         error.setMessage(e.getMessage());
@@ -32,12 +32,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Error> handleValidationException(MethodArgumentNotValidException e) {
-        Error error = new Error();
+    public ResponseEntity<ApiError> handleValidationException(MethodArgumentNotValidException e) {
+        ApiError error = new ApiError();
         ErrorList errorList = new ErrorList();
         errorList.setErrors(e.getBindingResult().getFieldErrors().stream()
                 .map(fieldError -> {
-                    Error fieldErrorObj = new Error();
+                    ApiError fieldErrorObj = new ApiError();
                     fieldErrorObj.setStatus(HttpStatus.BAD_REQUEST);
                     fieldErrorObj.setMessage(fieldError.getDefaultMessage());
                     return fieldErrorObj;
