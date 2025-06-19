@@ -46,7 +46,7 @@ jobs:
         uses: 'google-github-actions/auth@v2'
         with:
           project_id: 'paye-ton-kawa-poc'
-          workload_identity_provider: principal://iam.googleapis.com/projects/120571313220/locations/global/workloadIdentityPools/github/subject/repo:MurInc/paye-ton-kawa-bff:ref:refs/heads/main
+          workload_identity_provider: projects/120571313220/locations/global/workloadIdentityPools/github/providers/github
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Build and push Docker image
