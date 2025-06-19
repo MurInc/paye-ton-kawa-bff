@@ -25,6 +25,7 @@ jobs:
           allowUpdates: true
           draft: false
           makeLatest: true
+          tag: ${{ steps.semver.outputs.next }}
           name: ${{ steps.semver.outputs.next }}
           generateReleaseNotes: true
           token: ${{ github.token }}
