@@ -8,15 +8,20 @@ import com.BFF_paye_ton_kawa.order.DTO.OrderResponseDTO;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
+import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.web.bind.annotation.RestController;
 @Service
 public class OrderService {
     private final RestTemplate restTemplate;
 
     ApiProperties apiPros;
+    private static final Logger LOG = LogManager.getLogger(Controller.class);
 
     public OrderService(RestTemplate restTemplate, ApiProperties apiProps) {
         this.restTemplate = restTemplate;
@@ -24,8 +29,10 @@ public class OrderService {
     }
     public JsonMultipleResponse<OrderResponseDTO> getAllOrders() {
         String url = apiPros.getOrderUrl();
-        return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<JsonMultipleResponse<OrderResponseDTO>>() {
+        JsonMultipleResponse<OrderResponseDTO> response =  restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<JsonMultipleResponse<OrderResponseDTO>>() {
         }).getBody();
+        LOG.info("Fetching all orders from URL: {}", url);
+        return response;
     }
 
     public JsonSingleResponse<OrderResponseDTO> getOrder(String id) {
