@@ -71,13 +71,11 @@ jobs:
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
-        id: buildAndPush
         with:
           push: true
-          tags: bff-paye-ton-kawa/paye-ton-kawa-poc/paye-ton-kawa:${{ needs.versioning.outputs.next-version }}
+          tags: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ needs.versioning.outputs.next-version }}
           cache-from: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache
           cache-to: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache,mode=max
-
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
         with:
@@ -90,3 +88,4 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-results.sarif'
+
