@@ -17,6 +17,7 @@ jobs:
         with:
           token: ${{github.token}}
           branch: main
+          fallbackTag: v0.0.0
 
       - name: Create Release
         uses: ncipollo/release-action@v1.12.0
@@ -46,6 +47,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ steps.semver.outputs.next }},gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ github.sha }}
+          tags: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ steps.semver.outputs.next }}
           cache-from: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache
           cache-to: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache,mode=max
