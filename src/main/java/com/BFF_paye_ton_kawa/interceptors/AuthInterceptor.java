@@ -26,13 +26,12 @@ import java.util.List;
             String token = authHeader.substring(7);
 
             try {
-                String verifierPath = Paths.get("auth/win-token-verifier(1).exe").toAbsolutePath().toString();
+                String verifierPath = Paths.get("auth/win-token-verifier.exe").toAbsolutePath().toString();
                 ProcessBuilder pb = new ProcessBuilder(verifierPath, authHeader);
                 Process process = pb.start();
                 int exitCode = process.waitFor();
                 System.out.println("PreHandle: Token verified successfully.");
                 if (exitCode != 0) {
-                    System.out.println("PreHandle: TCOUCOU.");
 
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.getWriter().write("Unauthorized: invalid token");
