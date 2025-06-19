@@ -1,0 +1,51 @@
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: Gen next version
+        id: semver
+        uses: ietf-tools/semver-action@v1
+        with:
+          token: ${{github.token}}
+          branch: main
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1.12.0
+        with:
+          allowUpdates: true
+          draft: false
+          makeLatest: true
+          name: ${{ steps.semver.outputs.next }}
+          generateReleaseNotes: true
+          token: ${{ github.token }}
+
+  buildAndPush:
+    runs-on: ubuntu-latest
+    needs: release
+
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: Auth gcp
+        uses: 'google-github-actions/auth@v2'
+        with:
+          project_id: 'paye-ton-kawa-poc'
+          workload_identity_provider: principal://iam.googleapis.com/projects/120571313220/locations/global/workloadIdentityPools/github/subject/repo:MurInc/paye-ton-kawa-bff:ref:refs/heads/main
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ steps.semver.outputs.next }},gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ github.sha }}
+          cache-from: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache
+          cache-to: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache,mode=max
