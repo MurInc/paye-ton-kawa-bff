@@ -59,6 +59,8 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+      - name: Debug token
+        run: echo "Token is '${{ steps.auth.outputs.access_token }}'"
 
       - name: Debug semver output
         run: echo "Next version is '${{ needs.versioning.outputs.next-version }}'"
