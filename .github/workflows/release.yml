@@ -71,7 +71,7 @@ jobs:
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
-        id: build-push
+        id: buildAndPush
         with:
           push: true
           tags: bff-paye-ton-kawa/paye-ton-kawa-poc/paye-ton-kawa:${{ needs.versioning.outputs.next-version }}
@@ -81,7 +81,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
         with:
-          image-ref: ${{ build-push.outputs.imageid }}
+          image-ref: ${{ buildAndPush.outputs.imageid }}
           format: 'template'
           template: '@/contrib/sarif.tpl'
           output: 'trivy-results.sarif'
