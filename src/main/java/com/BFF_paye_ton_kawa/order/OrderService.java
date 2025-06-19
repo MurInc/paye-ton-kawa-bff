@@ -24,10 +24,6 @@ public class OrderService {
     }
     public JsonMultipleResponse<OrderResponseDTO> getAllOrders() {
         String url = apiPros.getOrderUrl();
-        System.out.println("getAllOrders");
-        System.out.println(url);
-        System.out.println(restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<JsonMultipleResponse<OrderResponseDTO>>() {
-        }));
         return restTemplate.exchange(url, HttpMethod.GET, null, new ParameterizedTypeReference<JsonMultipleResponse<OrderResponseDTO>>() {
         }).getBody();
     }
