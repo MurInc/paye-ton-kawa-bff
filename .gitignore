@@ -35,3 +35,5 @@ docker-compose.yml
 .vscode/
 serviceAccountKey.json
 trivy-results.sarif
+spring.log
+spring.log.2025-06-18.0.gz
