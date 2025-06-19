@@ -2,6 +2,10 @@ on:
   push:
     branches:
       - main
+  workflow_run:
+    workflows:
+      - 'sonarQube'
+
 
 permissions:
   id-token: write
@@ -72,6 +76,7 @@ jobs:
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
+        id: buildAndPush
         with:
           push: true
           tags: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ needs.versioning.outputs.next-version }}
