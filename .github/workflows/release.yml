@@ -49,6 +49,8 @@ jobs:
           workload_identity_provider: projects/120571313220/locations/global/workloadIdentityPools/github/providers/github
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+      - name: Debug semver output
+        run: echo "Next version is '${{ steps.semver.outputs.next }}'"
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
