@@ -17,6 +17,7 @@ public class GlobalExceptionHandler {
         ApiError error = new ApiError();
         error.setStatus(e.getStatusCode());
         error.setMessage(e.getResponseBodyAsString());
+
         return ResponseEntity.status(e.getStatusCode())
                 .body(error);
     }

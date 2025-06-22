@@ -8,6 +8,8 @@ import io.swagger.v3.core.util.Json;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -18,13 +20,16 @@ import org.springframework.web.client.HttpClientErrorException;
 @RequestMapping("/api/orders")
 public class OrderController {
     final OrderService orderService;
+    private static final Logger logger = LoggerFactory.getLogger(OrderController.class);
 
     public OrderController(OrderService orderService) {
+
         this.orderService = orderService;
     }
 
     @GetMapping("/")
     public JsonMultipleResponse<OrderResponseDTO> getOrders() {
+        logger.info("Fetching all orders");
         return orderService.getAllOrders();
     };
 
