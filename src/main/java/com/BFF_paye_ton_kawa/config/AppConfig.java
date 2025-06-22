@@ -1,7 +1,9 @@
 package com.BFF_paye_ton_kawa.config;
 
 import com.BFF_paye_ton_kawa.interceptors.AuthInterceptor;
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -32,6 +34,8 @@ public class AppConfig implements WebMvcConfigurer {
                 .excludePathPatterns("/swagger-ui/**")
                 .addPathPatterns("/api/**");
     }
-
-
+    @Bean
+    public OtlpGrpcSpanExporter otlpHttpSpanExporter(@Value("${tracing.url}") String url) {
+        return OtlpGrpcSpanExporter.builder().setEndpoint(url).build();
+    }
 }
