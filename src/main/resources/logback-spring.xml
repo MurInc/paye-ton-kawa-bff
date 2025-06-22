@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true">
+    <springProperty name="LOGSTASH_URL" source="logging.logstash.server"/>
+
+    <appender name="HTTP" class="com.BFF_paye_ton_kawa.log.HttpLogAppender">
+        <url>${LOGSTASH_URL}</url>
+    </appender>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="com.BFF_paye_ton_kawa" level="INFO"/>
+    <logger name="com.BFF_paye_ton_kawa.BffPayeTonKawaApplication" level="WARN"/>
+    <logger name="org.springframework.boot" level="WARN"/>
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.apache.catalina" level="WARN"/>
+    <logger name="org.apache.coyote" level="WARN"/>
+
+    <root level="WARN">
+        <appender-ref ref="HTTP"/>
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+
+</configuration>
