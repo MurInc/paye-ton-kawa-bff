@@ -59,11 +59,13 @@ jobs:
       tag: RC-${{inputs.sha-branch}}
     runs-on: ubuntu-latest
     steps:
-      - id: set_tag
-      - run: echo "tag=RC-${{ inputs.sha-branch }}" >> $GITHUB_OUTPUT
+      - name: set_tag
+        run: echo "tag=RC-${{ inputs.sha-branch }}" >> $GITHUB_OUTPUT
+
       - name: Release candidate
         run:
-          echo "Generated version: ${{ tag }}"
+          echo "Generated version: RC-${{ inputs.sha-branch }}"
+
 
   buildAndPush:
     runs-on: ubuntu-latest
