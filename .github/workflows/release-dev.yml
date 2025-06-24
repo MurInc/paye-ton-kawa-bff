@@ -72,11 +72,7 @@ jobs:
     name: Build and push Docker image
     runs-on: ubuntu-latest
     env:
-      TAG: ${{
-        (needs.create-release.result == 'success' && inputs.sha-branch == 'main')
-        && needs.create-release.outputs.tag
-        || needs.create-RC-tag.outputs.tag
-    }}
+      TAG: ${{ (needs.create-release.result == 'success' && inputs.sha-branch == 'main') && needs.create-release.outputs.tag || needs.create-RC-tag.outputs.tag }}
     steps:
       - run: |
           echo "Using tag: $TAG"
