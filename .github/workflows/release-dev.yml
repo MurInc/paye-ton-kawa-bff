@@ -3,10 +3,10 @@ on:
   workflow_dispatch:
     inputs:
       sha-branch:
-        description: Add the commit sha or branch name to me deployed
+        description: Add the commit sha or branch name to be deployed
         required: true
       isRelease:
-        description: Is it an official release ? is false, a Release candidate will be created.
+        description: Is it an official release? If false, a Release Candidate will be created.
         required: false
         default: false
 
@@ -19,23 +19,24 @@ jobs:
   test:
     name: Run tests
     uses: ./.github/workflows/sonarQube.yml
+
   create-release:
     name: Create production release
     needs: test
-    if: ${{ needs.test.result == 'success' && inputs.sha-branch == 'main'}}
+    if: ${{ needs.test.result == 'success' && inputs.sha-branch == 'main' }}
     runs-on: ubuntu-latest
     outputs:
       next-version: ${{ steps.semver.outputs.next }}
       tag: ${{ steps.semver.outputs.next }}
     steps:
-      - name: checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Gen next version
+      - name: Generate next version
         id: semver
         uses: ietf-tools/semver-action@v1
         with:
-          token: ${{github.token}}
+          token: ${{ github.token }}
           branch: main
           fallbackTag: 0.0.0
 
@@ -49,33 +50,38 @@ jobs:
           name: ${{ steps.semver.outputs.next }}
           generateReleaseNotes: true
           token: ${{ github.token }}
+
       - name: Show the generated tag in the console
-        run:
-          echo "Generated release: $TAG"
+        run: echo "Generated release: ${{ steps.semver.outputs.next }}"
 
   create-RC-tag:
-    name: create release candidate tag
-    outputs:
-      tag: RC-${{inputs.sha-branch}}
+    name: Create release candidate tag
     runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.set_tag.outputs.tag }}
     steps:
-      - name: set_tag
+      - id: set_tag
         run: echo "tag=RC-${{ inputs.sha-branch }}" >> $GITHUB_OUTPUT
 
-      - name: Release candidate
-        run:
-          echo "Generated version: RC-${{ inputs.sha-branch }}"
-
+      - name: Show RC tag
+        run: echo "Generated version: RC-${{ inputs.sha-branch }}"
 
   buildAndPush:
+    name: Build and push Docker image
     runs-on: ubuntu-latest
     env:
-      tag: ${{ needs.create-release.outputs.tag }}
+      TAG: ${{
+        (needs.create-release.result == 'success' && inputs.sha-branch == 'main')
+        && needs.create-release.outputs.tag
+        || needs.create-RC-tag.outputs.tag
+    }}
     steps:
-      - run: echo "Using tag tag"
-      - name: checkout code
+      - run: echo "Using tag: $TAG"
+
+      - name: Checkout code
         uses: actions/checkout@v4
-      - name: Auth gcp
+
+      - name: Auth GCP
         id: auth
         uses: 'google-github-actions/auth@v2'
         with:
@@ -98,13 +104,14 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ tag }}
+          tags: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ env.TAG }}
           cache-from: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache
           cache-to: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache,mode=max
+
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
         with:
-          image-ref: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ tag }}
+          image-ref: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ env.TAG }}
           format: 'template'
           template: '@/contrib/sarif.tpl'
           output: 'trivy-results.sarif'
@@ -114,4 +121,3 @@ jobs:
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-results.sarif'
-
