@@ -51,7 +51,7 @@ jobs:
           token: ${{ github.token }}
       - name: Show the generated tag in the console
         run:
-          echo "Generated version: $TAG"
+          echo "Generated release: $TAG"
 
   create-RC-tag:
     name: create release candidate tag
