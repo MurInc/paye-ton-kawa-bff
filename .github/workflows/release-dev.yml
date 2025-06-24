@@ -64,7 +64,7 @@ jobs:
         run: echo "tag=RC-${{ inputs.sha-branch }}" >> $GITHUB_OUTPUT
 
       - name: Show RC tag
-        run:
+        run: |
           echo "Generated version: RC-${{ inputs.sha-branch }}"
 
   buildAndPush:
