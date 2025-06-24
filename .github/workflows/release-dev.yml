@@ -9,8 +9,6 @@ on:
         description: Is it an official release ? is false, a Release candidate will be created.
         required: false
         default: false
-env:
-  TAG: ""
 
 permissions:
   id-token: write
@@ -24,11 +22,11 @@ jobs:
   create-release:
     name: Create production release
     needs: test
-    if: ${{ github.action.test.conclusion == 'success' && inputs.sha-branch == 'main'}}
+    if: ${{ needs.test.result == 'success' && inputs.sha-branch == 'main'}}
     runs-on: ubuntu-latest
     outputs:
       next-version: ${{ steps.semver.outputs.next }}
-      TAG: ${{ steps.semver.outputs.next }}
+      tag: ${{ steps.semver.outputs.next }}
     steps:
       - name: checkout code
         uses: actions/checkout@v4
@@ -53,23 +51,26 @@ jobs:
           token: ${{ github.token }}
       - name: Show the generated tag in the console
         run:
-          echo "Generated version: ${{ TAG }}"
+          echo "Generated version: $TAG"
 
   create-RC-tag:
     name: create release candidate tag
     outputs:
-      TAG: RC-${{inputs.sha-branch}}
+      tag: RC-${{inputs.sha-branch}}
     runs-on: ubuntu-latest
-    step:
+    steps:
+      - id: set_tag
+      - run: echo "tag=RC-${{ inputs.sha-branch }}" >> $GITHUB_OUTPUT
       - name: Release candidate
-        runs:
-          echo "Generated version: ${{ TAG }}"
+        run:
+          echo "Generated version: ${{ tag }}"
 
   buildAndPush:
     runs-on: ubuntu-latest
-    needs: create-release
-
+    env:
+      tag: ${{ needs.create-release.outputs.tag }}
     steps:
+      - run: echo "Using tag tag"
       - name: checkout code
         uses: actions/checkout@v4
       - name: Auth gcp
@@ -95,13 +96,13 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ TAG }}
+          tags: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ tag }}
           cache-from: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache
           cache-to: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache,mode=max
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
         with:
-          image-ref: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ TAG }}
+          image-ref: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ tag }}
           format: 'template'
           template: '@/contrib/sarif.tpl'
           output: 'trivy-results.sarif'
