@@ -73,9 +73,6 @@ jobs:
     env:
       TAG: ${{ (needs.create-release.result == 'success' && inputs.sha-branch == 'main') && needs.create-release.outputs.tag || needs.create-RC-tag.outputs.tag }}
     steps:
-      - run: |
-          echo "Using tag: $TAG"
-
       - name: Checkout code
         uses: actions/checkout@v4
 
