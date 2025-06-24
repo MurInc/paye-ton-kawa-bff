@@ -1,24 +1,34 @@
+name: Create release candidate
 on:
-  push:
-    branches:
-      - main
-  workflow_run:
-    workflows: 'SonarCloud analysis'
-    types:
-      - completed
-
+  workflow_dispatch:
+    inputs:
+      sha-branch:
+        description: Add the commit sha or branch name to me deployed
+        required: true
+      isRelease:
+        description: Is it an official release ? is false, a Release candidate will be created.
+        required: false
+        default: false
+env:
+  TAG: ""
 
 permissions:
   id-token: write
   contents: write
   security-events: write
 
-
 jobs:
-  versioning:
+  test:
+    name: Run tests
+    uses: ./.github/workflows/sonarQube
+  create-release:
+    name: Create production release
+    needs: test
+    if: ${{ github.action.test.conclusion == 'success' && inputs.sha-branch == 'main'}}
     runs-on: ubuntu-latest
     outputs:
       next-version: ${{ steps.semver.outputs.next }}
+      TAG: ${{ steps.semver.outputs.next }}
     steps:
       - name: checkout code
         uses: actions/checkout@v4
@@ -41,10 +51,23 @@ jobs:
           name: ${{ steps.semver.outputs.next }}
           generateReleaseNotes: true
           token: ${{ github.token }}
+      - name: Show the generated tag in the console
+        run:
+          echo "Generated version: ${{ TAG }}"
+
+  create-RC-tag:
+    name: create release candidate tag
+    outputs:
+      TAG: RC-${{inputs.sha-branch}}
+    runs-on: ubuntu-latest
+    step:
+      - name: Release candidate
+        runs:
+          echo "Generated version: ${{ TAG }}"
 
   buildAndPush:
     runs-on: ubuntu-latest
-    needs: versioning
+    needs: create-release
 
     steps:
       - name: checkout code
@@ -58,9 +81,6 @@ jobs:
           service_account: 'paye-ton-kawa-ci@paye-ton-kawa-poc.iam.gserviceaccount.com'
           token_format: 'access_token'
 
-      - name: Debug token
-        run: echo "Token is '${{ steps.auth.outputs.access_token }}'"
-
       - name: Configure Docker for Google Container Registry
         uses: docker/login-action@v2
         with:
@@ -71,21 +91,17 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-
-      - name: Debug semver output
-        run: echo "Next version is '${{ needs.versioning.outputs.next-version }}'"
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ needs.versioning.outputs.next-version }}
+          tags: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ TAG }}
           cache-from: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache
           cache-to: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache,mode=max
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
         with:
-          image-ref: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ needs.versioning.outputs.next-version }}
+          image-ref: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ TAG }}
           format: 'template'
           template: '@/contrib/sarif.tpl'
           output: 'trivy-results.sarif'
