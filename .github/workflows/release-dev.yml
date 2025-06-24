@@ -52,7 +52,8 @@ jobs:
           token: ${{ github.token }}
 
       - name: Show the generated tag in the console
-        run: echo "Generated release: ${{ steps.semver.outputs.next }}"
+        run:
+          echo "Generated release: ${{ steps.semver.outputs.next }}"
 
   create-RC-tag:
     name: Create release candidate tag
