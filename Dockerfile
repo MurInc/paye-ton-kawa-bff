@@ -5,6 +5,8 @@ WORKDIR /app
 
 COPY pom.xml .
 COPY src ./src
+COPY auth ./auth
+COPY elasticsearch ./elasticsearch
 
 # Build app
 RUN mvn clean package -DskipTests

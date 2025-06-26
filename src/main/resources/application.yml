@@ -1,4 +1,0 @@
-external:
-  apis:
-    product: http://localhost:3022/products
-    user:

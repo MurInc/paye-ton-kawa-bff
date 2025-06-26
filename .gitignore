@@ -33,9 +33,10 @@ envs
 docker-compose.yml
 ### VS Code ###
 .vscode/
-serviceAccountKey.json
+providers/product/serviceAccountKey.json
 trivy-results.sarif
 spring.log
 spring.log.2025-06-18.0.gz
 # Ignore generated credentials from google-github-actions/auth
 gha-creds-*.json
+providers
