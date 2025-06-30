@@ -1,6 +1,7 @@
 package com.BFF_paye_ton_kawa.client;
 
 import com.BFF_paye_ton_kawa.Utils.JsonMultipleResponse;
+import com.BFF_paye_ton_kawa.Utils.JsonSingleResponse;
 import com.BFF_paye_ton_kawa.client.DTO.ClientRequestDTO;
 import com.BFF_paye_ton_kawa.client.DTO.ClientResponseDTO;
 import com.BFF_paye_ton_kawa.client.DTO.ClientsResponseDTO;
@@ -30,7 +31,7 @@ public class ClientController {
     }
 
     @GetMapping("/{id}")
-    public ClientResponseDTO getClient(@PathVariable String id) {
+    public JsonSingleResponse<ClientResponseDTO> getClient(@PathVariable String id) {
         return  clientService.getClientById(id);
     }
 

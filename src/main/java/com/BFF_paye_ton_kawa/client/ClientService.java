@@ -1,6 +1,7 @@
 package com.BFF_paye_ton_kawa.client;
 
 import com.BFF_paye_ton_kawa.Utils.JsonMultipleResponse;
+import com.BFF_paye_ton_kawa.Utils.JsonSingleResponse;
 import com.BFF_paye_ton_kawa.client.DTO.ClientRequestDTO;
 import com.BFF_paye_ton_kawa.client.DTO.ClientResponseDTO;
 import com.BFF_paye_ton_kawa.client.DTO.ClientsResponseDTO;
@@ -35,10 +36,10 @@ public class ClientService {
 
     }
 
-    public ClientResponseDTO getClientById(String id) {
+    public JsonSingleResponse<ClientResponseDTO> getClientById(String id) {
         String path = apiProps.getClientUrl() + "/" + id;
         logger.info("Fetching client with ID: {} from path: {}", id, path);
-        return restTemplate.getForObject(path, ClientResponseDTO.class);
+        return restTemplate.exchange(path, HttpMethod.GET, null , new ParameterizedTypeReference<JsonSingleResponse<ClientResponseDTO>>(){}).getBody();
     }
 
     public ClientResponseDTO ClientCreation(ClientRequestDTO clientInformation) {

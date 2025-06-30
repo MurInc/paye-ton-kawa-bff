@@ -3,6 +3,9 @@ package com.BFF_paye_ton_kawa.exceptions;
 import com.BFF_paye_ton_kawa.exceptions.schema.ApiError;
 import com.BFF_paye_ton_kawa.exceptions.schema.ErrorList;
 import com.BFF_paye_ton_kawa.metrics.MetricsService;
+import com.BFF_paye_ton_kawa.order.OrderController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -14,6 +17,8 @@ import org.springframework.web.client.HttpClientErrorException;
 public class GlobalExceptionHandler {
 
     final MetricsService metrics;
+    private static final Logger logger = LoggerFactory.getLogger(OrderController.class);
+
 
     public GlobalExceptionHandler(MetricsService metrics) {
         this.metrics = metrics;
@@ -25,7 +30,7 @@ public class GlobalExceptionHandler {
         error.setStatus(e.getStatusCode());
         error.setMessage(e.getResponseBodyAsString());
         metrics.httpErrorCounter.increment();
-
+        logger.error("HTTP error occurred: {}", e.getMessage(), e);
         return ResponseEntity.status(e.getStatusCode())
                 .body(error);
     }
@@ -37,6 +42,7 @@ public class GlobalExceptionHandler {
         error.setStatus(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
         error.setMessage(e.getMessage());
         metrics.httpErrorCounter.increment();
+        logger.error("An unexpected error occurred: {}", e.getMessage(), e);
         return ResponseEntity.status(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(error);
     }
@@ -54,6 +60,7 @@ public class GlobalExceptionHandler {
                 }).toList());
         error.setStatus(HttpStatus.BAD_REQUEST);
         error.setMessage("Invalid input: " + e.getBindingResult().getFieldError().getDefaultMessage());
+        logger.error("Validation error occurred: {}", e.getMessage(), e);
         metrics.httpErrorCounter.increment();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(error);

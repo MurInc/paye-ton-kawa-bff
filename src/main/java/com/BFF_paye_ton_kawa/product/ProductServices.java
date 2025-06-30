@@ -1,6 +1,7 @@
 package com.BFF_paye_ton_kawa.product;
 
 import com.BFF_paye_ton_kawa.Utils.JsonMultipleResponse;
+import com.BFF_paye_ton_kawa.Utils.JsonSingleResponse;
 import com.BFF_paye_ton_kawa.config.ApiProperties;
 import com.BFF_paye_ton_kawa.product.DTO.ProductRequestDTO;
 import com.BFF_paye_ton_kawa.product.DTO.ProductResponseDTO;
@@ -31,9 +32,10 @@ public class ProductServices {
         return restTemplate.exchange(apiPros.getProductUrl(), HttpMethod.GET, null , new ParameterizedTypeReference<JsonMultipleResponse<ProductResponseDTO>>(){}).getBody();
     }
 
-    public ProductResponseDTO getProductById(String id) {
+    public JsonSingleResponse<ProductResponseDTO> getProductById(String id) {
         String path = apiPros.getProductUrl() + "/" + id;
-        return restTemplate.getForObject(path, ProductResponseDTO.class);
+        return restTemplate.exchange(path, HttpMethod.GET, null , new ParameterizedTypeReference<JsonSingleResponse<ProductResponseDTO>>(){}).getBody();
+
     }
 
     public ProductResponseDTO productCreation(ProductRequestDTO productInformation) {
