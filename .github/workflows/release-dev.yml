@@ -13,24 +13,26 @@ permissions:
   id-token: write
   contents: write
   security-events: write
+  pull-requests: read
 
 jobs:
   test:
     name: Run tests
     uses: ./.github/workflows/sonarQube.yml
 
+  checkout:
+    name: Checkout code
+    uses: actions/checkout@v4
+
   create-release:
     name: Create production release
     needs: test
-    if: ${{ needs.test.result == 'success' && inputs.sha-branch == 'main' }}
+    if: ${{ needs.test.result == 'success' && inputs.sha-branch == 'main' && inputs.isRelease }}
     runs-on: ubuntu-latest
     outputs:
       next-version: ${{ steps.semver.outputs.next }}
       tag: ${{ steps.semver.outputs.next }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Generate next version
         id: semver
         uses: ietf-tools/semver-action@v1
@@ -61,58 +63,58 @@ jobs:
       tag: ${{ steps.set_tag.outputs.tag }}
     steps:
       - id: set_tag
-        run: echo "tag=RC-${{ inputs.sha-branch }}" >> $GITHUB_OUTPUT
+        run: echo "tag={{ inputs.sha-branch }}" >> $GITHUB_OUTPUT
 
       - name: Show RC tag
         run: |
-          echo "Generated version: RC-${{ inputs.sha-branch }}"
+          echo "Generated version: {{ inputs.sha-branch }}"
 
-  buildAndPush:
-    name: Build and push Docker image
-    runs-on: ubuntu-latest
-    env:
-      TAG: ${{ (needs.create-release.result == 'success' && inputs.sha-branch == 'main') && needs.create-release.outputs.tag || needs.create-RC-tag.outputs.tag }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Auth GCP
-        id: auth
-        uses: 'google-github-actions/auth@v2'
-        with:
-          project_id: 'paye-ton-kawa-poc'
-          workload_identity_provider: projects/120571313220/locations/global/workloadIdentityPools/github/providers/github
-          service_account: 'paye-ton-kawa-ci@paye-ton-kawa-poc.iam.gserviceaccount.com'
-          token_format: 'access_token'
-
-      - name: Configure Docker for Google Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: gcr.io
-          username: oauth2accesstoken
-          password: ${{ steps.auth.outputs.access_token }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v6
-        with:
-          push: true
-          tags: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ env.TAG }}
-          cache-from: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache
-          cache-to: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache,mode=max
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
-        with:
-          image-ref: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ env.TAG }}
-          format: 'template'
-          template: '@/contrib/sarif.tpl'
-          output: 'trivy-results.sarif'
-          severity: 'LOW,CRITICAL,HIGH'
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy-results.sarif'
+#  buildAndPush:
+#    name: Build and push Docker image
+#    runs-on: ubuntu-latest
+#    env:
+#      TAG: ${{ (needs.create-release.result == 'success' && inputs.sha-branch == 'main') && needs.create-release.outputs.tag || needs.create-RC-tag.outputs.tag }}
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#
+#      - name: Auth GCP
+#        id: auth
+#        uses: 'google-github-actions/auth@v2'
+#        with:
+#          project_id: 'paye-ton-kawa-poc'
+#          workload_identity_provider: projects/120571313220/locations/global/workloadIdentityPools/github/providers/github
+#          service_account: 'paye-ton-kawa-ci@paye-ton-kawa-poc.iam.gserviceaccount.com'
+#          token_format: 'access_token'
+#
+#      - name: Configure Docker for Google Container Registry
+#        uses: docker/login-action@v2
+#        with:
+#          registry: gcr.io
+#          username: oauth2accesstoken
+#          password: ${{ steps.auth.outputs.access_token }}
+#
+#      - name: Set up Docker Buildx
+#        uses: docker/setup-buildx-action@v2
+#
+#      - name: Build and push Docker image
+#        uses: docker/build-push-action@v6
+#        with:
+#          push: true
+#          tags: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ env.TAG }}
+#          cache-from: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache
+#          cache-to: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache,mode=max
+#
+#      - name: Run Trivy vulnerability scanner
+#        uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
+#        with:
+#          image-ref: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ env.TAG }}
+#          format: 'template'
+#          template: '@/contrib/sarif.tpl'
+#          output: 'trivy-results.sarif'
+#          severity: 'LOW,CRITICAL,HIGH'
+#
+#      - name: Upload Trivy scan results to GitHub Security tab
+#        uses: github/codeql-action/upload-sarif@v3
+#        with:
+#          sarif_file: 'trivy-results.sarif'
