@@ -94,41 +94,45 @@ jobs:
           git push --set-upstream origin release/${{ needs.create-release.outputs.next-version }}
 
 
-#  buildAndPush:
-#    name: Build and push Docker image
-#    runs-on: ubuntu-latest
-#    env:
-#      TAG: ${{ (needs.create-release.result == 'success' && inputs.sha-branch == 'main' && isRelease) && needs.create-release.outputs.tag || needs.create-RC-tag.outputs.tag && !isRelease }}
-#    steps:
-#      - name: Checkout code
-#        uses: actions/checkout@v4
-#
-#      - name: Auth GCP
-#        id: auth
-#        uses: 'google-github-actions/auth@v2'
-#        with:
-#          project_id: 'paye-ton-kawa-poc'
-#          workload_identity_provider: projects/120571313220/locations/global/workloadIdentityPools/github/providers/github
-#          service_account: 'paye-ton-kawa-ci@paye-ton-kawa-poc.iam.gserviceaccount.com'
-#          token_format: 'access_token'
-#
-#      - name: Configure Docker for Google Container Registry
-#        uses: docker/login-action@v2
-#        with:
-#          registry: gcr.io
-#          username: oauth2accesstoken
-#          password: ${{ steps.auth.outputs.access_token }}
-#
-#      - name: Set up Docker Buildx
-#        uses: docker/setup-buildx-action@v2
-#
-#      - name: Build and push Docker image
-#        uses: docker/build-push-action@v6
-#        with:
-#          push: true
-#          tags: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ env.TAG }}
-#          cache-from: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache
-#          cache-to: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache,mode=max
+  buildAndPush:
+    needs: [create-release, create-RC-tag]
+    if: ${{ needs.create-release.result == 'sucess' || needs.create-RC-tag.result == 'sucess'  }}
+    name: Build and push Docker image
+    runs-on: ubuntu-latest
+    env:
+      tag: ${{ inputs.isRelease
+        && needs.create-release.outputs['next-version']
+        || needs.create-RC-tag.outputs.tag }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Auth GCP
+        id: auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+          project_id: 'paye-ton-kawa-poc'
+          workload_identity_provider: projects/120571313220/locations/global/workloadIdentityPools/github/providers/github
+          service_account: 'paye-ton-kawa-ci@paye-ton-kawa-poc.iam.gserviceaccount.com'
+          token_format: 'access_token'
+
+      - name: Configure Docker for Google Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: gcr.io
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{tag}}
+          cache-from: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache
+          cache-to: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache,mode=max
 ##
 #      - name: Run Trivy vulnerability scanner
 #        uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
