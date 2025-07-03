@@ -24,7 +24,7 @@ jobs:
   create-release:
     name: Create production release
 #    needs: test
-    if: ${{ inputs.sha-branch == 'develop' && inputs.isRelease }}
+    if: ${{ github.ref_name == 'develop' && inputs.isRelease }}
     runs-on: ubuntu-latest
     outputs:
       next-version: ${{ steps.semver.outputs.next }}
