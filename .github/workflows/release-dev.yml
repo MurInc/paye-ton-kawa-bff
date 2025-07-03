@@ -1,9 +1,6 @@
 on:
   workflow_dispatch:
     inputs:
-      commit-sha:
-        description: Add the commit sha or branch name to be deployed
-        required: false
       isRelease:
         description: Is it an official release? If false, a Release Candidate will be created.
         type: boolean
@@ -21,6 +18,14 @@ jobs:
 #    name: Run tests
 #    uses: ./.github/workflows/sonarQube.yml
 
+  env-run:
+    name: running environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: log env
+        run: |
+          echo "Generated release: ${{ github.ref_name }}"
+
   create-release:
     name: Create production release
 #    needs: test
@@ -37,7 +42,7 @@ jobs:
         uses: ietf-tools/semver-action@v1
         with:
           token: ${{ github.token }}
-          branch: main
+          branch: develop
           fallbackTag: 0.0.0
 
       - name: Create Release
