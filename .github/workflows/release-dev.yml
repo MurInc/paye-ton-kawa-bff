@@ -14,9 +14,9 @@ permissions:
   pull-requests: read
 
 jobs:
-#  test:
-#    name: Run tests
-#    uses: ./.github/workflows/sonarQube.yml
+  #  test:
+  #    name: Run tests
+  #    uses: ./.github/workflows/sonarQube.yml
 
   env-run:
     name: running environment
@@ -28,7 +28,7 @@ jobs:
 
   create-release:
     name: Create production release
-#    needs: test
+    #    needs: test
     if: ${{ github.ref_name == 'develop' && inputs.isRelease }}
     runs-on: ubuntu-latest
     outputs:
@@ -71,7 +71,7 @@ jobs:
         run: echo "tag={{ github.sha }}" >> $GITHUB_OUTPUT
 
       - name: Show RC tag
-        run:  |
+        run: |
           echo "Generated version: ${{ github.sha }}"
 
   releaseBranch:
@@ -79,14 +79,16 @@ jobs:
     name: Create release branch
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
       - name: Create release branch
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-      
+          
           # create the branch off the ref you want (e.g. the commit passed in “sha-branch”)
           git checkout -b release/${{ steps.semver.outputs.next }} FETCH_HEAD
-      
+          
           # push it to GitHub
           git push --set-upstream origin release/${{ steps.semver.outputs.next }}
 
