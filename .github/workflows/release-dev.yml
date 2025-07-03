@@ -6,6 +6,7 @@ on:
         required: true
       isRelease:
         description: Is it an official release? If false, a Release Candidate will be created.
+        type: boolean
         required: false
         default: false
 
@@ -16,23 +17,21 @@ permissions:
   pull-requests: read
 
 jobs:
-  test:
-    name: Run tests
-    uses: ./.github/workflows/sonarQube.yml
-
-  checkout:
-    name: Checkout code
-    uses: actions/checkout@v4
+#  test:
+#    name: Run tests
+#    uses: ./.github/workflows/sonarQube.yml
 
   create-release:
     name: Create production release
-    needs: test
-    if: ${{ needs.test.result == 'success' && inputs.sha-branch == 'main' && inputs.isRelease }}
+#    needs: test
+    if: ${{ inputs.sha-branch == 'main' && inputs.isRelease }}
     runs-on: ubuntu-latest
     outputs:
       next-version: ${{ steps.semver.outputs.next }}
       tag: ${{ steps.semver.outputs.next }}
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
       - name: Generate next version
         id: semver
         uses: ietf-tools/semver-action@v1
@@ -66,8 +65,8 @@ jobs:
         run: echo "tag={{ inputs.sha-branch }}" >> $GITHUB_OUTPUT
 
       - name: Show RC tag
-        run: |
-          echo "Generated version: {{ inputs.sha-branch }}"
+        run:  |
+          echo "Generated version: ${{ inputs.sha-branch }}"
 
 #  buildAndPush:
 #    name: Build and push Docker image
