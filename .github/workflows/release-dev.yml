@@ -130,7 +130,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{tag}}
+          tags: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{env.tag}}
           cache-from: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache
           cache-to: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache,mode=max
 ##
