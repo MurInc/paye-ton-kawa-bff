@@ -95,7 +95,7 @@ jobs:
           git push --set-upstream origin release/${{ needs.create-release.outputs.next-version }}
       - name: Create pull request
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.GH_ACTIONS_RELEASE_BOT }}
         run: |
           gh pr create -B main -H release/${{ needs.create-release.outputs.next-version }} --title "release: ${{ needs.create-release.outputs.next-version }}" --body "PR create for release ${{ needs.create-release.outputs.next-version }}"
           
