@@ -95,7 +95,7 @@ jobs:
           git push --set-upstream origin release/${{ needs.create-release.outputs.next-version }}
       - name: Create pull request
         run: |
-          gh pr create -B main -H release/${{ needs.create-release.outputs.next-version }} --title release: ${{ needs.create-release.outputs.next-version }}
+          gh pr create -B main -H release/${{ needs.create-release.outputs.next-version }} --title "release: ${{ needs.create-release.outputs.next-version }}"
           
 
   buildAndPush:
