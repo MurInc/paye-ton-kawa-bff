@@ -1,0 +1,186 @@
+name: Build Image and create release
+on:
+  workflow_dispatch:
+    inputs:
+      isRelease:
+        description: Is it an official release? If false, a Release Candidate will be created.
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  id-token: write
+  contents: write
+  security-events: write
+  pull-requests: write
+
+jobs:
+  #  test:
+  #    name: Run tests
+  #    uses: ./.github/workflows/sonarQube.yml
+
+  env-run:
+    name: running environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: log env
+        run: |
+          echo "Generated release: ${{ github.ref_name }}"
+
+  create-release:
+    name: Create production release
+    #    needs: test
+    if: ${{ github.ref_name == 'develop' && inputs.isRelease }}
+    runs-on: ubuntu-latest
+    outputs:
+      next-version: ${{ steps.semver.outputs.next }}
+      tag: ${{ steps.semver.outputs.next }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Generate next version
+        id: semver
+        uses: ietf-tools/semver-action@v1
+        with:
+          token: ${{ github.token }}
+          branch: develop
+          fallbackTag: 0.0.0
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1.12.0
+        with:
+          allowUpdates: true
+          draft: false
+          makeLatest: true
+          tag: ${{ steps.semver.outputs.next }}
+          name: ${{ steps.semver.outputs.next }}
+          generateReleaseNotes: true
+          token: ${{ github.token }}
+
+      - name: Show the generated tag in the console
+        run: |
+          echo "Generated release: ${{ steps.semver.outputs.next }}"
+
+  create-RC-tag:
+    if: ${{ github.ref_name != 'develop' && !inputs.isRelease }}
+    name: Create release candidate tag
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.set_tag.outputs.tag }}
+    steps:
+      - id: set_tag
+        run: echo "tag=${{ github.sha }}" >> $GITHUB_OUTPUT
+
+      - name: Show RC tag
+        run: |
+          echo "Generated version: ${{ github.sha }}"
+
+  releaseBranch:
+    needs: create-release
+    if: ${{ github.ref_name == 'develop' && inputs.isRelease }}
+    name: Create release branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Create release branch
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # create the branch off the ref you want (e.g. the commit passed in “sha-branch”)
+          git checkout -b release/${{ needs.create-release.outputs.next-version }}
+          
+          # push it to GitHub
+          git push --set-upstream origin release/${{ needs.create-release.outputs.next-version }}
+      - name: Create pull request
+        env:
+          GH_TOKEN: ${{ secrets.GH_ACTIONS_RELEASE_BOT }}
+        run: |
+          gh pr create -B main -H release/${{ needs.create-release.outputs.next-version }} --title "release: ${{ needs.create-release.outputs.next-version }}" --body "PR create for release ${{ needs.create-release.outputs.next-version }}"
+          
+
+  buildAndPush:
+    needs: create-release
+    if: ${{ needs.create-release.result == 'success' && inputs.isRelease}}
+    name: Build and push Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Auth GCP
+        id: auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+          project_id: 'paye-ton-kawa-poc'
+          workload_identity_provider: projects/120571313220/locations/global/workloadIdentityPools/github/providers/github
+          service_account: 'paye-ton-kawa-ci@paye-ton-kawa-poc.iam.gserviceaccount.com'
+          token_format: 'access_token'
+
+      - name: Configure Docker for Google Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: gcr.io
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{needs.create-release.outputs.next-version}}
+          cache-from: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache
+          cache-to: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache,mode=max
+  buildAndPushSnap:
+    needs: create-RC-tag
+    if: ${{ needs.create-RC-tag.result == 'success' && !inputs.isRelease }}
+    name: Build and push Docker image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Auth GCP
+        id: auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+          project_id: 'paye-ton-kawa-poc'
+          workload_identity_provider: projects/120571313220/locations/global/workloadIdentityPools/github/providers/github
+          service_account: 'paye-ton-kawa-ci@paye-ton-kawa-poc.iam.gserviceaccount.com'
+          token_format: 'access_token'
+
+      - name: Configure Docker for Google Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: gcr.io
+          username: oauth2accesstoken
+          password: ${{ steps.auth.outputs.access_token }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{needs.create-RC-tag.outputs.tag}}
+          cache-from: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache
+          cache-to: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache,mode=max
+ ##
+#      - name: Run Trivy vulnerability scanner
+#        uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
+#        with:
+#          image-ref: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{ env.TAG }}
+#          format: 'template'
+#          template: '@/contrib/sarif.tpl'
+#          output: 'trivy-results.sarif'
+#          severity: 'LOW,CRITICAL,HIGH'
+#
+#      - name: Upload Trivy scan results to GitHub Security tab
+#        uses: github/codeql-action/upload-sarif@v3
+#        with:
+#          sarif_file: 'trivy-results.sarif'
