@@ -1,3 +1,4 @@
+name: Build Image and create release
 on:
   workflow_dispatch:
     inputs:
@@ -92,7 +93,10 @@ jobs:
           
           # push it to GitHub
           git push --set-upstream origin release/${{ needs.create-release.outputs.next-version }}
-
+      - name: Create pull request
+        run: |
+          gh pr create -B main -H release/${{ needs.create-release.outputs.next-version }} --title release: ${{ needs.create-release.outputs.next-version }}
+          
 
   buildAndPush:
     needs: create-release
@@ -164,7 +168,7 @@ jobs:
           tags: gcr.io/paye-ton-kawa-poc/paye-ton-kawa:${{needs.create-RC-tag.outputs.tag}}
           cache-from: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache
           cache-to: type=registry,ref=gcr.io/paye-ton-kawa-poc/paye-ton-kawa:cache,mode=max
-##
+ ##
 #      - name: Run Trivy vulnerability scanner
 #        uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
 #        with:
