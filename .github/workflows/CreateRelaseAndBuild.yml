@@ -89,11 +89,13 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
           # create the branch off the ref you want (e.g. the commit passed in “sha-branch”)
-          git checkout -b release/${{ needs.create-release.outputs.next-version }} FETCH_HEAD
+          git checkout -b release/${{ needs.create-release.outputs.next-version }}
           
           # push it to GitHub
           git push --set-upstream origin release/${{ needs.create-release.outputs.next-version }}
       - name: Create pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           gh pr create -B main -H release/${{ needs.create-release.outputs.next-version }} --title "release: ${{ needs.create-release.outputs.next-version }}"
           
