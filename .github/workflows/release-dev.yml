@@ -68,7 +68,7 @@ jobs:
       tag: ${{ steps.set_tag.outputs.tag }}
     steps:
       - id: set_tag
-        run: echo "tag={{ github.sha }}" >> $GITHUB_OUTPUT
+        run: echo "tag=${{ github.sha }}" >> $GITHUB_OUTPUT
 
       - name: Show RC tag
         run: |
