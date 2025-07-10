@@ -18,6 +18,7 @@
     <logger name="org.springframework" level="WARN"/>
     <logger name="org.apache.catalina" level="WARN"/>
     <logger name="org.apache.coyote" level="WARN"/>
+    <logger name="io.micrometer.tracing.otel.propagation.BaggageTextMapPropagator" level="WARN"/>
 
     <root level="WARN">
         <appender-ref ref="HTTP"/>

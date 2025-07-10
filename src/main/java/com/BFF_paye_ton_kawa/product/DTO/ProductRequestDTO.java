@@ -2,6 +2,7 @@ package com.BFF_paye_ton_kawa.product.DTO;
 
 import jakarta.validation.constraints.*;
 
+
 public class ProductRequestDTO {
     @NotBlank(message = "Product name is required")
     private String name;

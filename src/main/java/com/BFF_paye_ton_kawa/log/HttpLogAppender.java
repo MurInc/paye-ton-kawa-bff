@@ -37,7 +37,7 @@ public class HttpLogAppender extends AppenderBase<ILoggingEvent> {
             payload.put("Logger", eventObject.getLoggerName());
             payload.put("Thread", eventObject.getThreadName());
             payload.put("Message", eventObject.getFormattedMessage());
-            payload.put("Service", "BFF_paye_ton_kawa");
+            payload.put("Properties.Service", "BFF_paye_ton_kawa");
 
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
             restTemplate.postForEntity(url, request, String.class);
